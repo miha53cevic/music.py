@@ -1,10 +1,14 @@
+# contains argv which is a list so we know the length
 import sys
+# argument parsing
 import argparse
+# glob used for recursive searching
+import glob
+import random
 
 # remove pygame welcome message
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1';
-
 # import music player
 import pygame as pg
 
@@ -12,70 +16,97 @@ import pygame as pg
 from mutagen.mp3 import MP3
 ############################################################################
 
-def ClockFormat(time):
-	if (time < 10):
-		return f"0{time}";
-	else: 
-		return time;
+class AudioPlayer:
+	def __init__(self):
+		self.volume = 1.0;
 
-def loadAudio(file, volume=1.0):
+	def setVolume(self, volume):
+		self.volume = float(volume);
 
-	if os.path.exists(file):
-		# initialize the music player
-		pg.mixer.init();
-		pg.mixer_music.load(file);
-		pg.mixer_music.set_volume(volume);
-		pg.mixer_music.play();
+	def loadRandomAudio(self, file: str, ext: str):
+		# get a list of tracks
+		track_list = glob.glob(file + f"/**/*.{ext}", recursive=True);
 
-		total_seconds = int(MP3(file).info.length);
-		total_minutes = int(total_seconds / 60);
-		total_seconds %= 60;
+		# check if no songs where found
+		if (len(track_list) == 0):
+			print(f"\n>>> Couldn't find any files in directory {file} with the extension .{ext}");
+			return;
 
-		total_seconds = ClockFormat(total_seconds);
-		total_minutes = ClockFormat(total_minutes);
+		# otherwise get a random track and play it
+		rand = random.randint(0, len(track_list) - 1);
 
-		print(f"\nPlaying... {file} at volume: {volume}");
+		self.loadAudio(track_list[rand]);
 
-		# play the file
-		while pg.mixer_music.get_busy():
-			miliseconds = pg.mixer_music.get_pos();
-			seconds = int(miliseconds / 1000) % 60;
-			minutes = int((miliseconds / 1000) / 60);
+	def loadAudio(self, file: str):
 
-			seconds = ClockFormat(seconds);
-			minutes = ClockFormat(minutes);
+		if os.path.exists(file):
+			# initialize the music player
+			pg.mixer.init();
+			pg.mixer_music.load(file);
+			pg.mixer_music.set_volume(self.volume);
+			pg.mixer_music.play();
 
-			# \r escape sequences goes back to the begining of the line 
-			# that is why we use \n\r 
-			# end="" makes sure it doesn't end with a new line
-			print(f"\r>> Time: {minutes}:{seconds} - {total_minutes}:{total_seconds}", end="");
+			total_seconds = int(MP3(file).info.length);
+			total_minutes = int(total_seconds / 60);
+			total_seconds %= 60;
 
-		print("\n\n>>> Song end! <<<");
+			# add 0 to times, example: 01:09
+			ClockFormat = lambda time: f"0{time}" if time < 10 else time;
+			
+			total_seconds = ClockFormat(total_seconds);
+			total_minutes = ClockFormat(total_minutes);
 
-	else:
-		print(">>> Can not open audio file! <<<");
+			# print info
+			print(f"\nPlaying... {file} at volume: {self.volume}");
+			print("-" * (len(file) + 28));
+
+			# play the file
+			while pg.mixer_music.get_busy():
+				miliseconds = pg.mixer_music.get_pos();
+				seconds = int(miliseconds / 1000) % 60;
+				minutes = int((miliseconds / 1000) / 60);
+
+				seconds = ClockFormat(seconds);
+				minutes = ClockFormat(minutes);
+
+				# \r escape sequences goes back to the begining of the line 
+				# that is why we use \n\r 
+				# end="" makes sure it doesn't end with a new line
+				print(f"\r>> Time: {minutes}:{seconds} - {total_minutes}:{total_seconds}", end="");
+
+			print("\n\n>>> Song end! <<<");
+
+		else:
+			print(">>> Can not open audio file! <<<");
+
+
 
 # if module is used as main
 if __name__ == "__main__":
 
 	try:
 		parser = argparse.ArgumentParser();
-		parser.add_argument("audiofile", help=".wav or .mp3");
+		parser.add_argument("audiofile", help="audiofile or folder[when using --random] location");
 		parser.add_argument("--volume", "-v", help="set volume 0.0 - 1.0");
+		# action="store_true" means that when not specifying it, it returns false otherwise it returns true
+		parser.add_argument("--random", "-r", help="play random song in a given folder (search is recursive /**)", action="store_true");
+		parser.add_argument("--extension", "-ext", help="Example: -ext mp3, used for --random");
 
 		if len(sys.argv) > 1:
 			# parse arguments
 			args = parser.parse_args();
-			
-			if (args.audiofile is not None):
-				if (args.volume is not None):
-					loadAudio(args.audiofile, float(args.volume));
-				else:
-					loadAudio(args.audiofile);
+
+			# initialize AudioPlayer
+			player = AudioPlayer();
+			player.setVolume(args.volume or 1.0);
+
+			if (args.random == True):
+				# if args.extension is None it sends "mp3"
+				player.loadRandomAudio(args.audiofile, args.extension or "mp3");
 			else:
-				print(">>> No audiofile given! <<<");
+				player.loadAudio(args.audiofile);
 		else:
-			print(">>> No arguments given! <<<");
+			print(">>> No audiofile given! <<<");
 			print(parser.print_help());
 
 	except KeyboardInterrupt:
