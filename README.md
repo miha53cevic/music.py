@@ -34,7 +34,3 @@ Used together with random to specify which extension to look for (default .mp3)
     cd musicpy
     pip3 install .
 ```
-Executable is inside the build/dist directory
-
-## Windows
-- move libmpg123.dll from pygame installation inside the python folder to the build/dist folder
