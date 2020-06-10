@@ -8,8 +8,8 @@ setup(
 
     install_requires=["pygame", "mutagen"],
     
-    # Create a console script named music that runs the main() function
-    # from music.py
+    # Create a console script named music inside the python folder with scripts
+    # that runs the main() function from music.py
     entry_points = {
         "console_scripts": ["music=musicpy.music:main"]
     },
