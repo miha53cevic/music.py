@@ -98,10 +98,7 @@ class AudioPlayer:
 			print(">>> Can not open audio file! <<<");
 
 
-
-# if module is used as main
-if __name__ == "__main__":
-
+def main():
 	try:
 		parser = argparse.ArgumentParser();
 		parser.add_argument("audiofile", help="audiofile or folder[when using --random] location");
@@ -135,3 +132,7 @@ if __name__ == "__main__":
 	except KeyboardInterrupt:
 		print("\n>>> CTRL-C called, exiting... <<<");
 		pass;
+
+# if module is used as main
+if __name__ == "__main__":
+	main();
