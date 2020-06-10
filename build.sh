@@ -3,6 +3,7 @@
 # python libraries
 pip3 install pygame
 pip3 install mutagen
+pip3 install pyinstaller
 
 # build directory
 mkdir build
