@@ -6,6 +6,7 @@ setup(
     author="Mihael Petričević",
     packages=find_packages(),
 
+    # Dependencies
     install_requires=["pygame", "mutagen"],
     
     # Create a console script named music inside the python folder with scripts

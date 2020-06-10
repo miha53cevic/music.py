@@ -31,7 +31,8 @@ Used together with random to specify which extension to look for (default .mp3)
 
 ## Install
 ```bash
-    sh build.sh
+    cd musicpy
+    pip3 install .
 ```
 Executable is inside the build/dist directory
 
