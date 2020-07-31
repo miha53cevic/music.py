@@ -90,6 +90,7 @@ class AudioPlayer:
 			if (self.loop == True):
 				self.loadAudio(file);
 			elif (self.repeat == True):
+				print("\n\n");
 				self.loadRandomAudio(self.repeatPath, self.repeatExt);
 
 			print("\n\n>>> Song end! <<<");
